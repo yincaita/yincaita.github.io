@@ -26,7 +26,11 @@
       
       <categories>
           
-          <category> 仅供测试category - 子分类1 </category>
+          <category> 仅供测试category </category>
+          
+          <category> 子分类1 </category>
+          
+          <category> 子分类1 </category>
           
       </categories>
       
