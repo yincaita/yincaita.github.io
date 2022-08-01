@@ -1,0 +1,9 @@
+/* 首页每个文章的高度 */
+.recent-post-item {
+    height: 16em !important;
+}
+
+/* 文章图片加上边框 */
+.fancybox img {
+    border: 4px solid #cfcfcf;
+}
