@@ -1,0 +1,246 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>VMware配置静态IP模板机 | yincaiTA' Blog</title><meta name="keywords" content="虚拟机,centos"><meta name="author" content="yincaiTA"><meta name="copyright" content="yincaiTA"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="引言事先准备一个静态IP模板虚拟机, 一是能快速克隆一个拥有干净环境的虚拟机, 新的虚拟机通过简单的配置, 就能使用; 二是静态IP易于管理, 一般采用连续的IP地址, 如192.168.1.107、192.168.1.108, 第一个可以单独来学redis、第二个又可以单独安装mysql。 下载centos这里选择安装centos7.8-minimal版本, 阿里云centos7.8地址, 选择">
+<meta property="og:type" content="article">
+<meta property="og:title" content="VMware配置静态IP模板机">
+<meta property="og:url" content="https://lsycai.top/template-virtual-machine/index.html">
+<meta property="og:site_name" content="yincaiTA&#39; Blog">
+<meta property="og:description" content="引言事先准备一个静态IP模板虚拟机, 一是能快速克隆一个拥有干净环境的虚拟机, 新的虚拟机通过简单的配置, 就能使用; 二是静态IP易于管理, 一般采用连续的IP地址, 如192.168.1.107、192.168.1.108, 第一个可以单独来学redis、第二个又可以单独安装mysql。 下载centos这里选择安装centos7.8-minimal版本, 阿里云centos7.8地址, 选择">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img.lsycai.top/cover/template-virtual-machine.png">
+<meta property="article:published_time" content="2022-08-06T04:52:14.000Z">
+<meta property="article:modified_time" content="2022-08-06T07:58:56.531Z">
+<meta property="article:author" content="yincaiTA">
+<meta property="article:tag" content="虚拟机">
+<meta property="article:tag" content="centos">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img.lsycai.top/cover/template-virtual-machine.png"><link rel="shortcut icon" href="/self/images/tab_favicon.png"><link rel="canonical" href="https://lsycai.top/template-virtual-machine/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//fonts.googleapis.com" crossorigin=""/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web&amp;display=swap" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"简","msgToSimplifiedChinese":"繁"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'VMware配置静态IP模板机',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-08-06 15:58:56'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const fontSizeVal = saveToLocal.get('global-font-size')
+    if (fontSizeVal !== undefined) {
+      document.documentElement.style.setProperty('--global-font-size', fontSizeVal + 'px')
+    }
+    
+    const detectApple = () => {
+      if (GLOBAL_CONFIG_SITE.isHome && /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><link rel="stylesheet" href="/self/css/atom-one-light.css"><link rel="stylesheet" href="/self/css/scroll-bar.css"><link rel="stylesheet" href="/self/css/h-title.css"><link rel="stylesheet" href="/self/css/some-style.css"><meta name="generator" content="Hexo 6.2.0"></head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/self/images/loading.gif" data-original="/self/images/author_avatar.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">5</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">9</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://img.lsycai.top/cover/template-virtual-machine.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">yincaiTA' Blog</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">VMware配置静态IP模板机</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2022-08-06T04:52:14.000Z" title="发表于 2022-08-06 12:52:14">2022-08-06</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-08-06T07:58:56.531Z" title="更新于 2022-08-06 15:58:56">2022-08-06</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Linux/">Linux</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="VMware配置静态IP模板机"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>事先准备一个静态IP模板虚拟机, 一是能<code>快速克隆一个拥有干净环境的虚拟机</code>, 新的虚拟机通过简单的配置, 就能使用; 二是<code>静态IP易于管理</code>, 一般采用连续的IP地址, 如192.168.1.107、192.168.1.108, 第一个可以单独来学redis、第二个又可以单独安装mysql。</p>
+<h1 id="下载centos"><a href="#下载centos" class="headerlink" title="下载centos"></a>下载centos</h1><p>这里选择安装centos7.8-minimal版本, <a target="_blank" rel="noopener" href="https://mirrors.aliyun.com/centos-vault/7.8.2003/isos/x86_64/">阿里云centos7.8地址</a>, 选择iso文件下载即可。</p>
+<h1 id="创建静态IP模板机"><a href="#创建静态IP模板机" class="headerlink" title="创建静态IP模板机"></a>创建静态IP模板机</h1><h2 id="虚拟机配置"><a href="#虚拟机配置" class="headerlink" title="虚拟机配置"></a>虚拟机配置</h2><p>在VMware里新建虚拟机, 选择我们之前下载的镜像即可, 指定虚拟机名称。</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/template-virtual-machine/choose-image-rename.png" alt="镜像选择及虚拟机命名"></p>
+<p>这里留意下, <code>网络类型</code>的选择, 一般选择桥接&#x2F;NAT, 这个选择会影响后续模板机静态IP的配置, 这里选择NAT。之后一路下一步即可, 有需要进行内存、处理器、硬盘配置的同学可以自行配置。</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/template-virtual-machine/network-type-choose.png" alt="网络类型选择"></p>
+<p>新建虚拟机向导完成后, 默认会自动启动虚拟机, 接下来完成centos的初始配置即可</p>
+<h2 id="centos初始配置"><a href="#centos初始配置" class="headerlink" title="centos初始配置"></a>centos初始配置</h2><p>centos-minimal版本的初始化过程很简单, 我们配置下语言、设置下root用户密码即可, 其他的就一直下一步, 等待一会叫我们重启, 进入输入用户名、密码界面, 就算成功!</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/template-virtual-machine/centos-minimal-init-config.png" alt="centos-minimal版本初始化"></p>
+<h2 id="获取网络配置基础信息"><a href="#获取网络配置基础信息" class="headerlink" title="获取网络配置基础信息"></a>获取网络配置基础信息</h2><p>这个时候, 我们的网络实际上还不可用, 尝试做以下动作, 可以看到<code>Network is unreachable</code>, 我们虚拟机ip也是错误的。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">ping阿里DNS地址</span><br>ping 223.5.5.5<br></code></pre></td></tr></table></figure>
+
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/template-virtual-machine/network-error-show.png" alt="网络错误的现象"></p>
+<p>我们下面进行配置网络.</p>
+<h3 id="虚拟机网络类型为NAT"><a href="#虚拟机网络类型为NAT" class="headerlink" title="虚拟机网络类型为NAT"></a>虚拟机网络类型为NAT</h3><p>这时候, 回忆之前新建虚拟机时, 我们选择的<mark class="hl-label blue">网络类型是NAT</mark>, 而配置模板机IP时, NAT模式需要保证虚拟机网段与VMnet8一致, 照下图配置即可。</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/template-virtual-machine/virtual-machine-network-config.png" alt="模板机网络配置"></p>
+<p>那么经过这一步后, 我们得到的信息有如下内容, 这些都是在之后配置虚拟机网络文件时需要的。</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs markdown"><span class="hljs-section"># 1. 子网地址 192.168.163.0</span><br>之后我们配置虚拟机IP时, 就能相对随意的配置为 192.168.163.x 了<br><span class="hljs-section"># 2. 网关地址</span><br>192.168.163.2 , 这个地址在之后配置虚拟机网络文件时需要<br><span class="hljs-section"># 3. 子网掩码</span><br>255.255.255.0 , 它同样在之后配置虚拟机网络文件时需要<br><span class="hljs-section"># 4. 当前虚拟机硬件地址, 通过 ip addr 命令获得(上图中已经获得)</span><br>当前虚拟机硬件地址为 00:0c:29:17:75:9b<br></code></pre></td></tr></table></figure>
+
+<h3 id="虚拟机网络类型为桥接模式"><a href="#虚拟机网络类型为桥接模式" class="headerlink" title="虚拟机网络类型为桥接模式"></a>虚拟机网络类型为桥接模式</h3><p>网络类型为桥接模式时, 我们获得上面4个内容的方式有所不同, 这时候我们需要保证<mark class="hl-label blue">虚拟机的网段与物理机的网段一致, 而网关地址, 需和物理主机网关相同</mark></p>
+<p>我们打开宿主机的命令行, 使用<code>ipconfig</code>查看信息。</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/template-virtual-machine/host-ip-config-show.png" alt="宿主机IP展示"></p>
+<p>我们依旧能获得4个配置信息, 主要是<code>子网地址</code>和<code>网关地址</code>的差距较大。</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs markdown"><span class="hljs-section"># 1. 子网地址 192.168.1.0</span><br>之后我们配置虚拟机IP时, 就能相对随意的配置为 192.168.1.x 了<br>只不过, 这种情况下虚拟机配置IP地址时, 还是尽量<span class="hljs-code">`和宿主机IP别配重叠了`</span>!<br><span class="hljs-section"># 2. 网关地址</span><br>192.168.1.1<br><span class="hljs-section"># 3. 子网掩码</span><br>255.255.255.0<br><span class="hljs-section"># 4. 当前虚拟机硬件地址, 通过 ip addr 命令获得(上图中已经获得)</span><br>当前虚拟机硬件地址为 00:0c:29:17:75:9b<br></code></pre></td></tr></table></figure>
+
+<h2 id="配置模板机网络"><a href="#配置模板机网络" class="headerlink" title="配置模板机网络"></a>配置模板机网络</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell">cd /etc/sysconfig/network-scripts<br><span class="hljs-meta prompt_"># </span><span class="language-bash">编辑网络配置文件</span><br>vi ifcfg-ens33<br></code></pre></td></tr></table></figure>
+
+<p>如下是需要修改的内容</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/template-virtual-machine/network-config-need-edit.png" alt="需要修改的配置"></p>
+<p>下面还有需要新增的配置, 修改并保存。</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs properties"><span class="hljs-attr">IPADDR</span>=<span class="hljs-string">192.168.163.10  # 这个参考上面不同网络类型的说明, 我这里是 NAT</span><br><span class="hljs-attr">NETMASK</span>=<span class="hljs-string">255.255.255.0  # 同上</span><br><span class="hljs-attr">GATEWAY</span>=<span class="hljs-string">192.168.163.2  # 同上</span><br><span class="hljs-attr">HWADDR</span>=<span class="hljs-string">00:0c:29:17:75:9b  # 通过 ip addr 命令获得, ens33设备下的物理地址</span><br><span class="hljs-attr">DNS1</span>=<span class="hljs-string">223.5.5.5  # 这里能配置多个DNS服务器地址, 这里我只配了阿里的DNS服务器</span><br></code></pre></td></tr></table></figure>
+
+<p>重启网络服务</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">service network restart<br></code></pre></td></tr></table></figure>
+
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/template-virtual-machine/network-restart.png" alt="重启网络成功"></p>
+<p>从这时候开始, 我们 <code>ping 百度</code> 也能ping通, yum工具也能正常下载工具包了。</p>
+<h1 id="模板机环境优化"><a href="#模板机环境优化" class="headerlink" title="模板机环境优化"></a>模板机环境优化</h1><p>现在使用xshell等ssh客户端工具, 还无法连接上我们的虚拟机。</p>
+<p>我们下载ssh-server包。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">yum install -y openssh-server<br></code></pre></td></tr></table></figure>
+
+<p>配置ssh</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell">cd /etc/ssh/<br>vim sshd_config<br></code></pre></td></tr></table></figure>
+
+<p>暂时打开允许root用户登录即可。</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/template-virtual-machine/ssh-allow-root-login.png" alt="ssh允许root用户登录"></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">为了免去每次开启 CentOS 时，都要手动开启  sshd 服务，可以将 sshd 服务添加至自启动列表中，输入</span><br>systemctl enable sshd<br></code></pre></td></tr></table></figure>
+
+<p>修改完后重启服务, 重启sshd服务：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">service sshd restart<br></code></pre></td></tr></table></figure>
+
+<p>之后得开放22端口, 或者选择性禁用防火墙。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs shell">firewall-cmd --zone=public --add-port=22/tcp --permanent  # 防火墙开启22端口<br>firewall-cmd --reload  # 必须重启防火墙，否则不生效<br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">简单点直接禁用防火墙</span><br>systemctl disable firewalld.service<br></code></pre></td></tr></table></figure>
+
+<p>确保22端口已经被占用</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/template-virtual-machine/confirm-22port.png" alt="确保22端口已经占用"></p>
+<p>然后就能远程ssh连接了。</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/template-virtual-machine/ssh-login-success.png" alt="ssh登录成功"></p>
+<div class="note danger simple"><p>danger 如果出现ssh连接不上虚拟机的问题, 参考下面内容</p>
+</div>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">ping虚拟机出现超时问题</span><br>ping 192.168.163.10<br></code></pre></td></tr></table></figure>
+
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/template-virtual-machine/host-ping-virtual-error.png" alt="宿主机ping不通虚拟机"></p>
+<p>这是因为情况下<mark class="hl-label blue">虚拟机网络模式为NAT模式</mark>的情况下, 虚拟机通过VMnet8与宿主机通信, 但是它们并不处于一个网段下。(网桥模式应该就没这个ping不通的问题)</p>
+<p>进行如下配置即可。</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/template-virtual-machine/edit-vmnet8-config.png" alt="修改宿主机VMnet8的配置"></p>
+<p>配置后在宿主机上就能ping通虚拟机了, ssh连接也没问题了。</p>
+<div class="note primary simple"><p>primary 在这之后的话, 就能给模板机安装Java、net-tools等环境了, 这个就看个人如何使用了</p>
+</div>
+
+<h1 id="拷贝模板机"><a href="#拷贝模板机" class="headerlink" title="拷贝模板机"></a>拷贝模板机</h1><p>现在如果我们将这个纯净的模板机做一个<code>克隆</code>, 将克隆后的虚拟机专门用作redis或其他用途, 我们进行如下操作。</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/template-virtual-machine/clone-template-virtual-machine.png" alt="克隆模板机"></p>
+<p>启动模板机后, 我们需要做如下操作来配置新的虚拟机的网络</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">查看新虚拟机的物理地址</span><br>ip addr<br></code></pre></td></tr></table></figure>
+
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/template-virtual-machine/new-virtual-machine-hwaddr.png" alt="新虚拟机的物理地址"></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell">cd /etc/sysconfig/network-scripts<br><span class="hljs-meta prompt_"># </span><span class="language-bash">编辑网络配置文件</span><br>vim ifcfg-ens33<br></code></pre></td></tr></table></figure>
+
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/template-virtual-machine/edit-new-network-config.png" alt="修改新虚拟机的网络配置"></p>
+<p>重启网络即可</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">service network restart<br></code></pre></td></tr></table></figure>
+
+<p>简单测试下, 物理机ping得通新的虚拟机(192.168.163.11)即可咯~</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">yincaiTA</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://lsycai.top/template-virtual-machine/">https://lsycai.top/template-virtual-machine/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://lsycai.top" target="_blank">yincaiTA' Blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E8%99%9A%E6%8B%9F%E6%9C%BA/">虚拟机</a><a class="post-meta__tags" href="/tags/centos/">centos</a></div><div class="post_share"><div class="social-share" data-image="https://img.lsycai.top/cover/template-virtual-machine.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-full"><a href="/spring-source-core-compile/"><img class="prev-cover" src="/self/images/loading.gif" data-original="https://img.lsycai.top/cover/spring-source-compile.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Spring源码编译</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/self/images/loading.gif" data-original="/self/images/author_avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">yincaiTA</div><div class="author-info__description">小善的学习笔记 🐟</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">5</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">9</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div></div><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/yincaita" target="_blank" title="Github"><i class="fab fa-github"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%BC%95%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">引言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%8B%E8%BD%BDcentos"><span class="toc-number">2.</span> <span class="toc-text">下载centos</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E9%9D%99%E6%80%81IP%E6%A8%A1%E6%9D%BF%E6%9C%BA"><span class="toc-number">3.</span> <span class="toc-text">创建静态IP模板机</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%99%9A%E6%8B%9F%E6%9C%BA%E9%85%8D%E7%BD%AE"><span class="toc-number">3.1.</span> <span class="toc-text">虚拟机配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#centos%E5%88%9D%E5%A7%8B%E9%85%8D%E7%BD%AE"><span class="toc-number">3.2.</span> <span class="toc-text">centos初始配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%8E%B7%E5%8F%96%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE%E5%9F%BA%E7%A1%80%E4%BF%A1%E6%81%AF"><span class="toc-number">3.3.</span> <span class="toc-text">获取网络配置基础信息</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%BD%91%E7%BB%9C%E7%B1%BB%E5%9E%8B%E4%B8%BANAT"><span class="toc-number">3.3.1.</span> <span class="toc-text">虚拟机网络类型为NAT</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%BD%91%E7%BB%9C%E7%B1%BB%E5%9E%8B%E4%B8%BA%E6%A1%A5%E6%8E%A5%E6%A8%A1%E5%BC%8F"><span class="toc-number">3.3.2.</span> <span class="toc-text">虚拟机网络类型为桥接模式</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E6%A8%A1%E6%9D%BF%E6%9C%BA%E7%BD%91%E7%BB%9C"><span class="toc-number">3.4.</span> <span class="toc-text">配置模板机网络</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%A8%A1%E6%9D%BF%E6%9C%BA%E7%8E%AF%E5%A2%83%E4%BC%98%E5%8C%96"><span class="toc-number">4.</span> <span class="toc-text">模板机环境优化</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%8B%B7%E8%B4%9D%E6%A8%A1%E6%9D%BF%E6%9C%BA"><span class="toc-number">5.</span> <span class="toc-text">拷贝模板机</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/template-virtual-machine/" title="VMware配置静态IP模板机"><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/cover/template-virtual-machine.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="VMware配置静态IP模板机"/></a><div class="content"><a class="title" href="/template-virtual-machine/" title="VMware配置静态IP模板机">VMware配置静态IP模板机</a><time datetime="2022-08-06T04:52:14.000Z" title="发表于 2022-08-06 12:52:14">2022-08-06</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/spring-source-core-compile/" title="Spring源码编译"><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/cover/spring-source-compile.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Spring源码编译"/></a><div class="content"><a class="title" href="/spring-source-core-compile/" title="Spring源码编译">Spring源码编译</a><time datetime="2022-01-10T08:33:46.000Z" title="发表于 2022-01-10 16:33:46">2022-01-10</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/butterfly-theme-config/" title="butterfly主题配置"><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/cover/hexo-butterfly-config.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="butterfly主题配置"/></a><div class="content"><a class="title" href="/butterfly-theme-config/" title="butterfly主题配置">butterfly主题配置</a><time datetime="2021-12-25T16:03:33.000Z" title="发表于 2021-12-26 00:03:33">2021-12-26</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/hexo-basics/" title="hexo的基本使用"><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/cover/hexo-basics.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="hexo的基本使用"/></a><div class="content"><a class="title" href="/hexo-basics/" title="hexo的基本使用">hexo的基本使用</a><time datetime="2021-12-25T15:31:55.000Z" title="发表于 2021-12-25 23:31:55">2021-12-25</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/glidedsky/" title="glidedsky网站爬虫练习"><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/cover/glidedsky.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="glidedsky网站爬虫练习"/></a><div class="content"><a class="title" href="/glidedsky/" title="glidedsky网站爬虫练习">glidedsky网站爬虫练习</a><time datetime="2021-06-15T11:03:49.000Z" title="发表于 2021-06-15 19:03:49">2021-06-15</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('https://img.lsycai.top/cover/template-virtual-machine.png')"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2022 By yincaiTA</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="font-plus" type="button" title="放大字体"><i class="fas fa-plus"></i></button><button id="font-minus" type="button" title="缩小字体"><i class="fas fa-minus"></i></button><button id="translateLink" type="button" title="简繁转换">简</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script>
+            window.imageLazyLoadSetting = {
+                isSPA: false,
+                preloadRatio: 1,
+                processImages: null,
+            };
+        </script><script>window.addEventListener("load",function(){var t=/\.(gif|jpg|jpeg|tiff|png)$/i,r=/^data:image\/[a-z]+;base64,/;Array.prototype.slice.call(document.querySelectorAll("img[data-original]")).forEach(function(a){var e=a.parentNode;"A"===e.tagName&&(e.href.match(t)||e.href.match(r))&&(e.href=a.dataset.original)})});</script><script>!function(n){n.imageLazyLoadSetting.processImages=o;var e=n.imageLazyLoadSetting.isSPA,i=n.imageLazyLoadSetting.preloadRatio||1,r=Array.prototype.slice.call(document.querySelectorAll("img[data-original]"));function o(){e&&(r=Array.prototype.slice.call(document.querySelectorAll("img[data-original]")));for(var t,a=0;a<r.length;a++)0<=(t=(t=r[a]).getBoundingClientRect()).bottom&&0<=t.left&&t.top<=(n.innerHeight*i||document.documentElement.clientHeight*i)&&function(){var t,e,n,i,o=r[a];t=o,e=function(){r=r.filter(function(t){return o!==t})},n=new Image,i=t.getAttribute("data-original"),n.onload=function(){t.src=i,e&&e()},t.src!==i&&(n.src=i)}()}o(),n.addEventListener("scroll",function(){var t,e;t=o,e=n,clearTimeout(t.tId),t.tId=setTimeout(function(){t.call(e)},500)})}(this);</script></body></html>
