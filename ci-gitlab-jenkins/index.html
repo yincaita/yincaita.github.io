@@ -1,0 +1,496 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>持续集成 Gitlab、Jenkins方案 | yincaiTA' Blog</title><meta name="keywords" content="Gitlab,CI,k8s,Jenkins"><meta name="author" content="yincaiTA"><meta name="copyright" content="yincaiTA"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="机器准备均关闭了防火墙  Gitlab、Jenkins、sonarqube 均使用docker容器安装 192.168.163.21: 该机器上有docker、docker-compose环境 2核8G   harbor镜像仓库 docker容器安装 192.168.163.28: 该机器上有docker、docker-compose环境 2核4G   k8smaster 参考kuboard官方文">
+<meta property="og:type" content="article">
+<meta property="og:title" content="持续集成 Gitlab、Jenkins方案">
+<meta property="og:url" content="https://lsycai.top/ci-gitlab-jenkins/index.html">
+<meta property="og:site_name" content="yincaiTA&#39; Blog">
+<meta property="og:description" content="机器准备均关闭了防火墙  Gitlab、Jenkins、sonarqube 均使用docker容器安装 192.168.163.21: 该机器上有docker、docker-compose环境 2核8G   harbor镜像仓库 docker容器安装 192.168.163.28: 该机器上有docker、docker-compose环境 2核4G   k8smaster 参考kuboard官方文">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img.lsycai.top/cover/ci-gitlab-jenkins.png">
+<meta property="article:published_time" content="2023-02-01T07:44:00.000Z">
+<meta property="article:modified_time" content="2023-02-06T15:22:29.410Z">
+<meta property="article:author" content="yincaiTA">
+<meta property="article:tag" content="Gitlab">
+<meta property="article:tag" content="CI">
+<meta property="article:tag" content="k8s">
+<meta property="article:tag" content="Jenkins">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img.lsycai.top/cover/ci-gitlab-jenkins.png"><link rel="shortcut icon" href="/self/images/tab_favicon.png"><link rel="canonical" href="https://lsycai.top/ci-gitlab-jenkins/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//fonts.googleapis.com" crossorigin=""/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web&amp;display=swap" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"简","msgToSimplifiedChinese":"繁"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '持续集成 Gitlab、Jenkins方案',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2023-02-06 23:22:29'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const fontSizeVal = saveToLocal.get('global-font-size')
+    if (fontSizeVal !== undefined) {
+      document.documentElement.style.setProperty('--global-font-size', fontSizeVal + 'px')
+    }
+    
+    const detectApple = () => {
+      if (GLOBAL_CONFIG_SITE.isHome && /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><link rel="stylesheet" href="/self/css/atom-one-light.css"><link rel="stylesheet" href="/self/css/scroll-bar.css"><link rel="stylesheet" href="/self/css/h-title.css"><link rel="stylesheet" href="/self/css/some-style.css"><meta name="generator" content="Hexo 6.2.0"></head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/self/images/loading.gif" data-original="/self/images/author_avatar.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">7</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">13</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">5</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://img.lsycai.top/cover/ci-gitlab-jenkins.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">yincaiTA' Blog</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">持续集成 Gitlab、Jenkins方案</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-02-01T07:44:00.000Z" title="发表于 2023-02-01 15:44:00">2023-02-01</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-02-06T15:22:29.410Z" title="更新于 2023-02-06 23:22:29">2023-02-06</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/CI/">CI</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="持续集成 Gitlab、Jenkins方案"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="机器准备"><a href="#机器准备" class="headerlink" title="机器准备"></a>机器准备</h1><p>均关闭了防火墙</p>
+<ol>
+<li>Gitlab、Jenkins、sonarqube<ul>
+<li>均使用docker容器安装</li>
+<li>192.168.163.21: 该机器上有docker、docker-compose环境</li>
+<li>2核8G</li>
+</ul>
+</li>
+<li>harbor镜像仓库<ul>
+<li>docker容器安装</li>
+<li>192.168.163.28: 该机器上有docker、docker-compose环境</li>
+<li>2核4G</li>
+</ul>
+</li>
+<li>k8smaster<ul>
+<li>参考kuboard官方文档安装</li>
+<li>192.168.163.29</li>
+<li>2核4G</li>
+</ul>
+</li>
+<li>k8sworker<ul>
+<li>参考kuboard官方文档安装</li>
+<li>192.168.163.30</li>
+<li>2核4G</li>
+</ul>
+</li>
+</ol>
+<h1 id="Gialab安装"><a href="#Gialab安装" class="headerlink" title="Gialab安装"></a>Gialab安装</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">docker pull gitlab/gitlab-ce:15.0.5-ce.0<br></code></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell">[root@localhost gitlab]# pwd<br>/usr/local/gitlab<br></code></pre></td></tr></table></figure>
+
+<p>创建<code>docker-compose.yml</code>文件</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">version:</span> <span class="hljs-string">&#x27;1.0&#x27;</span><br><span class="hljs-attr">services:</span><br>  <span class="hljs-attr">gitlab:</span><br>    <span class="hljs-attr">image:</span> <span class="hljs-string">&#x27;gitlab/gitlab-ce:15.0.5-ce.0&#x27;</span><br>    <span class="hljs-attr">container_name:</span> <span class="hljs-string">gitlab</span><br>    <span class="hljs-attr">restart:</span> <span class="hljs-string">always</span><br>    <span class="hljs-attr">environment:</span><br>      <span class="hljs-attr">GITLAB_OMNIBUS_CONFIG:</span> <span class="hljs-string">|</span><br><span class="hljs-string">        external_url &#x27;http://192.168.163.21:8929&#x27;</span><br><span class="hljs-string">        gitlab_rails[&#x27;gitlab_shell_ssh_port&#x27;] = 2224</span><br><span class="hljs-string"></span>    <span class="hljs-attr">ports:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-string">&#x27;8929:8929&#x27;</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-string">&#x27;2224:22&#x27;</span><br>    <span class="hljs-attr">volumes:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-string">&#x27;./config:/etc/gitlab&#x27;</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-string">&#x27;./logs:/var/log/gitlab&#x27;</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-string">&#x27;./data:/var/opt/gitlab&#x27;</span><br>    <span class="hljs-attr">privileged:</span> <span class="hljs-literal">true</span><br></code></pre></td></tr></table></figure>
+
+<p>启动容器</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">docker-compose up -d<br></code></pre></td></tr></table></figure>
+
+<p>稍等一会, 访问<code>http://192.168.163.21:8929/</code>就能看到Gitlab登陆页面了。接下来就去<mark class="hl-label blue">config&#x2F;initial_root_password</mark>文件看root用户初始密码(容器内或者挂载的目录下看都可)</p>
+<p>第一次进去了, 就把密码修改了。</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/update-root-password.png" alt="修改root用户初始密码"></p>
+<p>顺便把ssh公钥给配置上, 方便之后直接上传代码, 这个ssh公钥的内容就是宿主机<code>用户目录/.ssh</code>目录下<code>id_rsa.pub</code>的文件内容, 如果不存在百度生成下这个文件即可。</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/gitlab-config-ssh.png" alt="配置ssh公钥"></p>
+<h1 id="Jenkins安装"><a href="#Jenkins安装" class="headerlink" title="Jenkins安装"></a>Jenkins安装</h1><h2 id="宿主机环境准备"><a href="#宿主机环境准备" class="headerlink" title="宿主机环境准备"></a>宿主机环境准备</h2><p>宿主机提前准备好JDK和maven, 之后Jenkins安装好了, 直接通过数据卷挪进去。</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/prepare-jenkins.png" alt="提前准备JDK和maven环境"></p>
+<p>解压压缩包, 并把jdk和maven的文件夹名称分别修改为java、maven ,并配置Maven的settings.xml</p>
+<div class="tabs" id=""><ul class="nav-tabs"><li class="tab active"><button type="button" data-href="#-1">腾讯云镜像地址</button></li><li class="tab"><button type="button" data-href="#-2">JDK1.8编译插件</button></li></ul><div class="tab-contents"><div class="tab-item-content active" id="-1"><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">mirror</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">id</span>&gt;</span>nexus-tencentyun<span class="hljs-tag">&lt;/<span class="hljs-name">id</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">mirrorOf</span>&gt;</span>*<span class="hljs-tag">&lt;/<span class="hljs-name">mirrorOf</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">name</span>&gt;</span>Nexus tencentyun<span class="hljs-tag">&lt;/<span class="hljs-name">name</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">url</span>&gt;</span>http://mirrors.cloud.tencent.com/nexus/repository/maven-public/<span class="hljs-tag">&lt;/<span class="hljs-name">url</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">mirror</span>&gt;</span><br></code></pre></td></tr></table></figure><button type="button" class="tab-to-top" aria-label="scroll to top"><i class="fas fa-arrow-up"></i></button></div><div class="tab-item-content" id="-2"><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">profile</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">id</span>&gt;</span>jdk-1.8<span class="hljs-tag">&lt;/<span class="hljs-name">id</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">activation</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">activeByDefault</span>&gt;</span>true<span class="hljs-tag">&lt;/<span class="hljs-name">activeByDefault</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">jdk</span>&gt;</span>1.8<span class="hljs-tag">&lt;/<span class="hljs-name">jdk</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">activation</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">properties</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">maven.compiler.source</span>&gt;</span>1.8<span class="hljs-tag">&lt;/<span class="hljs-name">maven.compiler.source</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">maven.compiler.target</span>&gt;</span>1.8<span class="hljs-tag">&lt;/<span class="hljs-name">maven.compiler.target</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">maven.compiler.compilerVersion</span>&gt;</span>1.8<span class="hljs-tag">&lt;/<span class="hljs-name">maven.compiler.compilerVersion</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">properties</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">profile</span>&gt;</span><br></code></pre></td></tr></table></figure><button type="button" class="tab-to-top" aria-label="scroll to top"><i class="fas fa-arrow-up"></i></button></div></div></div>
+
+<h2 id="Jenkins安装-1"><a href="#Jenkins安装-1" class="headerlink" title="Jenkins安装"></a>Jenkins安装</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell">[root@localhost gitlab]# pwd<br>/usr/local/jenkins<br></code></pre></td></tr></table></figure>
+
+<p>在jenkins目录下, 准备docker-compose.yml文件</p>
+<div class="note red icon modern"><i class="note-icon fas fa-fan"></i><p>注意下载的jenkins镜像, 镜像名是jenkins&#x2F;jenkins, 而不是jenkins.</p>
+<p>挂载后三个数据卷, 是为后续jenkins容器内使用宿主机docker命令做准备.</p>
+</div>
+
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">version:</span> <span class="hljs-string">&quot;1.0&quot;</span><br><span class="hljs-attr">services:</span><br>  <span class="hljs-attr">jenkins:</span><br>    <span class="hljs-attr">image:</span> <span class="hljs-string">jenkins/jenkins:lts</span><br>    <span class="hljs-attr">container_name:</span> <span class="hljs-string">jenkins</span><br>    <span class="hljs-attr">privileged:</span> <span class="hljs-literal">true</span><br>    <span class="hljs-attr">environment:</span><br>      <span class="hljs-attr">JENKINS_UC:</span> <span class="hljs-string">&quot;https://mirrors.cloud.tencent.com/jenkins/&quot;</span><br>      <span class="hljs-attr">JENKINS_UC_DOWNLOAD:</span> <span class="hljs-string">&quot;https://mirrors.cloud.tencent.com/jenkins/&quot;</span><br>    <span class="hljs-attr">ports:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-number">8080</span><span class="hljs-string">:8080</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-number">50000</span><span class="hljs-string">:50000</span><br>    <span class="hljs-attr">volumes:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-string">./data/:/var/jenkins_home/</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-string">/usr/bin/docker:/usr/bin/docker</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-string">/var/run/docker.sock:/var/run/docker.sock</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-string">/etc/docker/daemon.json:/etc/docker/daemon.json</span><br></code></pre></td></tr></table></figure>
+
+<p>首次启动会因为数据卷data目录没有权限导致启动失败，<mark class="hl-label blue">设置data目录写权限</mark>。或者事先创建data目录, 先修改data目录写权限。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">chmod -R a+w data/<br></code></pre></td></tr></table></figure>
+
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/set-data-dir-write-perm.png" alt="设置data目录写权限"></p>
+<p>重新启动Jenkins容器, 等待一会, 访问8080端口进登录首页。</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/jenkins-login.png" alt="Jenkins登陆首页"></p>
+<p>查看初始化的登录密码, 在<mark class="hl-label blue"><code>secrets/initialAdminPassword</code></mark>文件中</p>
+<p>下载默认插件即可, 如果失败了重新下载或者直接下一步, 进去后在插件管理处下载所需插件也可。</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/download-plugins.png" alt="下载插件"></p>
+<p>紧接着创建管理员用户和配置访问地址</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/config-admin-user.png" alt="配置管理员用户和访问地址"></p>
+<p>发现好像是缺失部分插件。</p>
+<ol>
+<li><p><code>ssh-credentials</code>: 看下图描述, 应该它对应的插件就是<mark class="hl-label blue">SSH Agent</mark>.</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/ssh-agent-desc.png" alt="SSH Agent描述"></p>
+</li>
+<li><p>之前初始化过程中下载失败的两个Pipeline插件</p>
+<ul>
+<li><mark class="hl-label blue">Pipeline</mark></li>
+<li><mark class="hl-label blue">Pipeline: Declarative</mark></li>
+</ul>
+</li>
+</ol>
+<p>在插件商店重新下载后, 重启jenkins容器, 刷新网页即可</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">docker-compose restart jenkins<br></code></pre></td></tr></table></figure>
+
+<h2 id="配置JDK和Maven"><a href="#配置JDK和Maven" class="headerlink" title="配置JDK和Maven"></a>配置JDK和Maven</h2><p>首先把宿主机的java和maven环境直接拷贝到数据卷内, 从而让jenkins容器能进行打包及java相关操作。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">宿主机内操作</span><br>[root@localhost jenkins]# pwd<br>/usr/local/jenkins<br><span class="hljs-meta prompt_"># </span><span class="language-bash">将java目录一并复制到数据卷 data目录下(这里我为了宿主机也继续拥有java环境, 所以使用拷贝)</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">[root@localhost jenkins]<span class="hljs-comment"># cp -r /usr/local/java ./data  # 如果jenkins容器本身就有java就不用再把java环境挂载进去了</span></span><br>[root@localhost jenkins]# cp -r /usr/local/maven ./data<br></code></pre></td></tr></table></figure>
+
+<p>Jenkins配置JDK&amp;Maven并保存</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/jenkins-config-java-maven.png" alt="jenkins内配置jdk和maven"></p>
+<h2 id="配置SSH-Server"><a href="#配置SSH-Server" class="headerlink" title="配置SSH Server"></a>配置SSH Server</h2><p>Jenkins, 系统管理&#x2F;系统配置, 新增一个目标服务器(k8s)</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/add-publish-server.png" alt="新增目标服务器"></p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/config-publish-server.png" alt="配置目标服务器"></p>
+<h2 id="准备Gitlab代码"><a href="#准备Gitlab代码" class="headerlink" title="准备Gitlab代码"></a>准备Gitlab代码</h2><h3 id="SpringBoot应用"><a href="#SpringBoot应用" class="headerlink" title="SpringBoot应用"></a>SpringBoot应用</h3><p>宿主机生成ssh公钥, 放到gitlab中。在宿主机创建一个简洁的SpringBoot项目, 只存在一个测试接口, 确保项目能打包并且使用<mark class="hl-label blue">java -jar xx.jar</mark>运行起来。</p>
+<div class="tabs" id="maven-peoject"><ul class="nav-tabs"><li class="tab active"><button type="button" data-href="#maven-peoject-1">pom.xml</button></li><li class="tab"><button type="button" data-href="#maven-peoject-2">application.yml</button></li><li class="tab"><button type="button" data-href="#maven-peoject-3">controller.TestController</button></li></ul><div class="tab-contents"><div class="tab-item-content active" id="maven-peoject-1"><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">parent</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-starter-parent<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>2.7.2<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">relativePath</span>/&gt;</span> <span class="hljs-comment">&lt;!-- lookup parent from repository --&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">parent</span>&gt;</span><br><br><span class="hljs-tag">&lt;<span class="hljs-name">dependencies</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-starter-web<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">dependencies</span>&gt;</span><br><br><span class="hljs-tag">&lt;<span class="hljs-name">build</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">finalName</span>&gt;</span>cicd<span class="hljs-tag">&lt;/<span class="hljs-name">finalName</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">plugins</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">plugin</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-maven-plugin<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>        <span class="hljs-tag">&lt;/<span class="hljs-name">plugin</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">plugins</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">build</span>&gt;</span><br></code></pre></td></tr></table></figure><button type="button" class="tab-to-top" aria-label="scroll to top"><i class="fas fa-arrow-up"></i></button></div><div class="tab-item-content" id="maven-peoject-2"><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs java">server:<br>  port: <span class="hljs-number">8080</span><br></code></pre></td></tr></table></figure><button type="button" class="tab-to-top" aria-label="scroll to top"><i class="fas fa-arrow-up"></i></button></div><div class="tab-item-content" id="maven-peoject-3"><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@RestController</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">TestController</span> &#123;<br>    <br>    <span class="hljs-meta">@GetMapping(&quot;test&quot;)</span><br>    <span class="hljs-keyword">public</span> String <span class="hljs-title function_">test</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;test - 01&quot;</span>;<br>    &#125;<br>    <br>&#125;<br></code></pre></td></tr></table></figure><button type="button" class="tab-to-top" aria-label="scroll to top"><i class="fas fa-arrow-up"></i></button></div></div></div>
+
+<p>建立一个gitlab群组(比如说叫 backend), 然后在这个群组下创建一个gitlab仓库。</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/create-group.png" alt="创建群组"></p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/create-project.png" alt="创建项目"></p>
+<p>接下来进行分支配置, 模拟下公司环境。</p>
+<ol>
+<li>基于main(默认分支)新建dev分支</li>
+<li>将dev分支设置为保护分支, 禁止远程推送</li>
+</ol>
+<p>将main、dev设置为保护分支, 并禁止远程推送</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/config-dev-protect-branch.png" alt="设置dev为保护分支"></p>
+<p>接下来将我们的项目推上去, 这里将仓库名(cicd)和项目打包名(cicd.jar)保持一致, 方便后续操作。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">注意之前的端口映射, 如果ssh没配置好, 这里<span class="hljs-built_in">clone</span>会出现 port 2224: Connection refused</span><br>git clone ssh://git@192.168.163.21:2224/backend/cicd.git<br><br>git remote add origin ssh://git@192.168.163.21:2224/backend/cicd.git<br>git add .<br>git commit -m &quot;init test maven project&quot;<br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">因为远程dev是保护分支, 我们得切到自己分支, 并push自己分支</span><br>git checkout -b yincaiTA<br>git push --set-upstream origin yincaiTA<br><br>git init<br><span class="hljs-meta prompt_"># </span><span class="language-bash">注意ssh用的是 2224 端口噢!!!!</span><br>git remote add origin ssh://git@192.168.163.21:2224/backend/cicd.git<br><span class="hljs-meta prompt_"># </span><span class="language-bash">拉取远程dev分支代码</span><br>git fetch origin dev<br>git checkout -b dev origin/dev<br><span class="hljs-meta prompt_"># </span><span class="language-bash">提交个人的测试项目</span><br>git add .<br>git commit -m &quot;init test maven project&quot;<br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">从最新的dev上切出个人分支, 因为我们远程dev是保护分支, 无法直接push</span><br>git checkout -b yincaiTA<br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">指定远程分支推送</span><br>git push --set-upstream origin yincaiTA<br></code></pre></td></tr></table></figure>
+
+<p>之后在远程(gitlab)中进行请求合并分支, 如果有分支建议在本地合并了再push。</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/merge-request.png" alt="和并请求"></p>
+<div class="note info modern"><p>接下来的开发流程就是: 本地dev分支pull代码, 切换到yincaiTA(本地个人开发分支), merge dev并解决冲突, 然后push yincaiTA分支, 最后在远程发起和并请求</p>
+</div>
+
+<p>下面能看到dev代码就是最新的啦</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/lastest-dev.png" alt="dev已经是最新代码了"></p>
+<h3 id="准备Dockerfile"><a href="#准备Dockerfile" class="headerlink" title="准备Dockerfile"></a>准备Dockerfile</h3><p>这一步是是将jar构建成镜像, 并运行。</p>
+<ul>
+<li>镜像是为了之后使用k8s进行部署做铺垫</li>
+</ul>
+<p>项目目录下新增一个docker目录, 配置Dockerfile</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/dockerfile-config.png" alt="Dockerfile配置"></p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs dockerfile"><span class="hljs-comment"># 通过Dockerfile构建jar为镜像</span><br><span class="hljs-keyword">FROM</span> daocloud.io/library/java:<span class="hljs-number">8</span>u40-jdk<br><span class="hljs-keyword">COPY</span><span class="language-bash"> cicd.jar /usr/local/</span><br><span class="hljs-keyword">WORKDIR</span><span class="language-bash"> /usr/local</span><br><span class="hljs-keyword">CMD</span><span class="language-bash"> java -jar cicd.jar</span><br></code></pre></td></tr></table></figure>
+
+<h1 id="Jenkins集成Sonar-Qube"><a href="#Jenkins集成Sonar-Qube" class="headerlink" title="Jenkins集成Sonar Qube"></a>Jenkins集成Sonar Qube</h1><h2 id="安装Sonar-Qube"><a href="#安装Sonar-Qube" class="headerlink" title="安装Sonar Qube"></a>安装Sonar Qube</h2><p>Sonar Qube是一个开源的代码分析平台，支持Java、Python、PHP、JavaScript、CSS等25种以上的语言，可以检测出<code>重复代码</code>、<code>代码漏洞</code>、<code>代码规范</code>和<code>安全性漏洞</code>的问题。</p>
+<p>Sonar Qube可以与多种软件整合进行代码扫描，比如Maven、Gradle、Git、Jenkins等，并且会<code>将代码检测结果推送回Sonar Qube</code>并且在系统提供的UI界面上显示出来。</p>
+<p>Sonar Qube在7.9版本中已经放弃了对MySQL的支持，并且建议在商业环境中采用PostgreSQL，那么安装Sonar Qube时需要依赖PostgreSQL。</p>
+<p>首先拉取需要的镜像。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell">docker pull postgres:12.11<br><span class="hljs-meta prompt_"># </span><span class="language-bash">sonarqube别用9+版本, 不然之后代码质量检测会有编译jar和运行环境的JDK版本不兼容的问题</span><br>docker pull sonarqube:8.9.6-community<br></code></pre></td></tr></table></figure>
+
+<p>准备一个docker-compose.yml的配置文件</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">version:</span> <span class="hljs-string">&quot;1.0&quot;</span><br><span class="hljs-attr">services:</span><br>  <span class="hljs-attr">db:</span><br>    <span class="hljs-attr">image:</span> <span class="hljs-string">postgres:12.11</span><br>    <span class="hljs-attr">container_name:</span> <span class="hljs-string">db</span><br>    <span class="hljs-attr">ports:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-number">5432</span><span class="hljs-string">:5432</span><br>    <span class="hljs-attr">networks:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-string">sonarnet</span><br>    <span class="hljs-attr">environment:</span><br>      <span class="hljs-attr">POSTGRES_USER:</span> <span class="hljs-string">sonar</span><br>      <span class="hljs-attr">POSTGRES_PASSWORD:</span> <span class="hljs-string">sonar</span><br>  <span class="hljs-attr">sonarqube:</span><br>    <span class="hljs-attr">image:</span> <span class="hljs-string">sonarqube:8.9.6-community</span><br>    <span class="hljs-attr">container_name:</span> <span class="hljs-string">sonarqube</span><br>    <span class="hljs-attr">depends_on:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-string">db</span><br>    <span class="hljs-attr">ports:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-string">&quot;9000:9000&quot;</span><br>    <span class="hljs-attr">networks:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-string">sonarnet</span><br>    <span class="hljs-attr">environment:</span><br>      <span class="hljs-attr">SONAR_JDBC_URL:</span> <span class="hljs-string">jdbc:postgresql://db:5432/sonar</span><br>      <span class="hljs-attr">SONAR_JDBC_USERNAME:</span> <span class="hljs-string">sonar</span><br>      <span class="hljs-attr">SONAR_JDBC_PASSWORD:</span> <span class="hljs-string">sonar</span><br><span class="hljs-attr">networks:</span><br>  <span class="hljs-attr">sonarnet:</span><br>    <span class="hljs-attr">driver:</span> <span class="hljs-string">bridge</span><br><span class="hljs-comment"># 这两个服务网络的驱动方式是桥接</span><br><span class="hljs-comment"># db既是postgres容器名, 也是服务名</span><br></code></pre></td></tr></table></figure>
+
+<p>执行如下命令构建并启动容器</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">docker-compose up -d<br></code></pre></td></tr></table></figure>
+
+<p>出现这样的错</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs shell">ERROR: [1] bootstrap checks failed. You must address the points described in the following [1] lines before starting Elasticsearch.<br>bootstrap check failure [1] of [1]: max virtual memory areas vm.max_map_count [65530] is too low, increase to at least [262144]<br>ERROR: Elasticsearch did not exit normally - check the logs at /opt/sonarqube/logs/sonarqube.log<br>2022.10.10 07:36:57 INFO  es[][o.e.n.Node] stopping ...<br></code></pre></td></tr></table></figure>
+
+<p>需要将宿主机的虚拟内存(<code>vm.max_map_count</code>)给加到至少262144.</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">vim /etc/sysctl.conf<br></code></pre></td></tr></table></figure>
+
+<p>在这个文件末尾追加上如下内容</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">vm.max_map_count=262144<br></code></pre></td></tr></table></figure>
+
+<p>再更新下内核运行配置参数</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell">sysctl -p<br><span class="hljs-meta prompt_"># </span><span class="language-bash">sysctl命令被用于在内核运行时动态地修改内核的运行参数</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">参数p: 从配置文件<span class="hljs-string">&quot;/etc/sysctl.conf&quot;</span>加载内核参数</span><br></code></pre></td></tr></table></figure>
+
+<p>现在重新构建容器并启动就行了。</p>
+<p>然后访问<code>http://192.168.163.21:9000/</code>即可访问sonarqube了, 默认用户名&#x2F;密码是admin&#x2F;admin。(admin&#x2F;sonar)</p>
+<p>安装中文插件, 根据页面提示重启server即可。</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/sonarqube-chinese.png" alt="安装中文插件"></p>
+<h2 id="挂载sonar-scanner到Jenkins数据卷"><a href="#挂载sonar-scanner到Jenkins数据卷" class="headerlink" title="挂载sonar-scanner到Jenkins数据卷"></a>挂载sonar-scanner到Jenkins数据卷</h2><p>使得jenkins容器使用命令调用sonar-scanner, 生成代码质量检测结果.</p>
+<p>下载网站: <a target="_blank" rel="noopener" href="https://docs.sonarqube.org/latest/analysis/scan/sonarscanner/%E3%80%82">https://docs.sonarqube.org/latest/analysis/scan/sonarscanner/。</a></p>
+<p>这里我选择4.6的linux版进行下载.</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/sonar-scanner-download.png" alt="下载sonar-scanner"></p>
+<p>下载好后上传到linux上, 解压.</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs shell">[root@localhost sonar-scanner]# ls<br>sonar-scanner-cli-4.6.0.2311-linux.zip<br>[root@localhost sonar-scanner]# unzip sonar-scanner-cli-4.6.0.2311-linux.zip<br>[root@localhost sonar-scanner]# mv sonar-scanner-4.6.0.2311-linux sonar-scanner<br><span class="hljs-meta prompt_"># </span><span class="language-bash">因为后期jenkins可能会用到sonar-scanner, 这里将sonar-scanner拷贝一份到jenkins数据卷中</span><br>[root@localhost sonar-scanner]# cp -r sonar-scanner ../jenkins/data<br></code></pre></td></tr></table></figure>
+
+<p>对sonar-scanner进行配置</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell">[root@localhost sonar-scanner]# cd /usr/local/jenkins/data/sonar-scanner/conf/<br>[root@localhost conf]# vim sonar-scanner.properties<br></code></pre></td></tr></table></figure>
+
+<p><code>修改配置为如下内容</code></p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs properties"><span class="hljs-comment">#----- Default SonarQube server</span><br><span class="hljs-attr">sonar.host.url</span>=<span class="hljs-string">http://192.168.163.21:9000</span><br><span class="hljs-comment"></span><br><span class="hljs-comment">#----- Default source code encoding</span><br><span class="hljs-attr">sonar.sourceEncoding</span>=<span class="hljs-string">UTF-8</span><br></code></pre></td></tr></table></figure>
+
+<p>下面是sonar-scanner检测代码质量的命令, 后面会用到(下图是生成token的方式)</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">下面执行代码检测, 命令敲错了也会有提示的~</span><br>[root@localhost manual-ci]# /usr/local/jenkins/data/sonar-scanner/bin/sonar-scanner -Dsonar.sources=./ -Dsonar.projectname=sonarscanner-test -Dsonar.login=7de3ca0b06045e2131f6cdda033293f904a4f356 -Dsonar.projectKey=sonarscanner-test -Dsonar.java.binaries=./target/<br></code></pre></td></tr></table></figure>
+
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/sonarqube-generate-token.png" alt="生成token"></p>
+<h2 id="整合sonarqube到jenkins"><a href="#整合sonarqube到jenkins" class="headerlink" title="整合sonarqube到jenkins"></a>整合sonarqube到jenkins</h2><p>jenkins安装sonarqube插件</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/jenkins-install-sonarscanner.png" alt="jenkins安装sonarsacnner插件"></p>
+<p>接下来在<code>系统配置</code>中, 配置<code>SonarQube servers</code></p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/jenkins-config-sonar.png" alt="配置sonarserver"></p>
+<p>接下来, 在<code>全局配置</code>中, 配置<code>SonarQube Scanner</code></p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/jenkins-global-sonar-config.png" alt="配置sonarserver-2"></p>
+<h1 id="harbor镜像仓库"><a href="#harbor镜像仓库" class="headerlink" title="harbor镜像仓库"></a>harbor镜像仓库</h1><h2 id="安装Harbor"><a href="#安装Harbor" class="headerlink" title="安装Harbor"></a>安装Harbor</h2><p>现有问题: 如果多个机器都需要jar镜像, 那么这个推送jar并构建镜像的操作就会进行多次, 而这完全是重复的操作。</p>
+<p>进行优化: </p>
+<ul>
+<li>jenkins容器调用宿主机docker进行打包镜像并推送</li>
+<li>发送命令给目标服务器执行拉取镜像的命令</li>
+</ul>
+<p>我这里加个虚拟机(192.168.163.28), 专门部署harbor.</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/edit-harbor-config.png" alt="harbor配置文件修改"></p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/harbor-start-success.png" alt="启动成功"></p>
+<p>浏览器访问<code>harborIP:80</code>即可</p>
+<ul>
+<li>用户名: admin</li>
+<li>默认密码: Harbor12345</li>
+</ul>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/harbor-home-page.png" alt="harbor主页"></p>
+<p>新建个用户</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/harbor-add-user.png" alt="新建用户"></p>
+<p>新建项目(私有)</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/harbor-add-project.png" alt="新建私有项目"></p>
+<p>项目授权给用户使用</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/authorize-user.png" alt="授权项目给用户"></p>
+<p>之后的操作就用<code>cicd</code>这个运维账号进行。</p>
+<h2 id="推送镜像到仓库的预配置"><a href="#推送镜像到仓库的预配置" class="headerlink" title="推送镜像到仓库的预配置"></a>推送镜像到仓库的预配置</h2><h3 id="镜像名规范"><a href="#镜像名规范" class="headerlink" title="镜像名规范"></a>镜像名规范</h3><p>修改镜像名命令: <code>docker tag imageId 192.168.163.28:80/cicd/cicd:v1.0.0</code></p>
+<p>镜像名称规范：<code>harborIP地址:80/项目名/镜像名:版本</code>, 符合该规范的镜像才能被推送到指定仓库</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/rename-image.png" alt="镜像改名"></p>
+<h3 id="仓库白名单配置"><a href="#仓库白名单配置" class="headerlink" title="仓库白名单配置"></a>仓库白名单配置</h3><p>&#x3D;&#x3D;该配置k8smaster和k8sworker都得做&#x3D;&#x3D;</p>
+<p>修改<code>/var/docker/daemon.json</code>文件, 增加<code>insecure-registries</code>配置, 相当于docker白名单</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs json"><span class="hljs-punctuation">&#123;</span><br>  <span class="hljs-attr">&quot;registry-mirrors&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;https://yz5wi4lf.mirror.aliyuncs.com&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span><br>  <span class="hljs-attr">&quot;insecure-registries&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;http://192.168.163.28:80&quot;</span><span class="hljs-punctuation">]</span><br><span class="hljs-punctuation">&#125;</span><br></code></pre></td></tr></table></figure>
+
+<p>重启docker刷新配置</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">systemctl restart docker<br></code></pre></td></tr></table></figure>
+
+
+
+<p>测试是否能手动推送</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell">docker login -u cicd -p Harbor12345 192.168.163.28:80<br><br>docker push 192.168.163.28:80/cicd/cicd:v1.0.0<br></code></pre></td></tr></table></figure>
+
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/image-push-success.png" alt="推送成功"></p>
+<p>手动拉取</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">docker pull 192.168.163.28:80/cicd/cicd:v1.0.0<br></code></pre></td></tr></table></figure>
+
+<h3 id="Jenkins容器内部执行宿主机docker命令"><a href="#Jenkins容器内部执行宿主机docker命令" class="headerlink" title="Jenkins容器内部执行宿主机docker命令"></a>Jenkins容器内部执行宿主机docker命令</h3><p>配置Jenkins容器使用宿主机Docker, 调用宿主机docker命令进行推送</p>
+<p>执行如下命令</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell">sudo chown root:root /var/run/docker.sock<br>sudo chmod o+rw /var/run/docker.sock<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>重启后该文件权限、用户组就变回去了, 所以按照如下操作, 让机器在启动后也执行一次该配置命令</p>
+</blockquote>
+<p>CentOS7.9, 在<code>/etc/rc.d/rc.local</code>文件中加入配置docker.sock文件的权限, 机器重启后就能保证其权限及所属组正确。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell">sudo chown root:root /var/run/docker.sock<br>sudo chmod o+rw /var/run/docker.sock<br></code></pre></td></tr></table></figure>
+
+<h1 id="安装K8s"><a href="#安装K8s" class="headerlink" title="安装K8s"></a>安装K8s</h1><h2 id="安装k8s集群"><a href="#安装k8s集群" class="headerlink" title="安装k8s集群"></a>安装k8s集群</h2><p>安装k8s集群: <a target="_blank" rel="noopener" href="https://www.kuboard.cn/install/history-k8s/install-k8s-1.19.x.html">利用Kuboard安装k8s集群</a>, 照着教程做就好</p>
+<ul>
+<li>192.168.163.29(master)</li>
+<li>192.168.163.30(worker)</li>
+</ul>
+<p>安装完毕</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs shell">[root@localhost local]# kubectl get nodes -o wide<br>NAME        STATUS   ROLES    AGE     VERSION   INTERNAL-IP      EXTERNAL-IP   OS-IMAGE                KERNEL-VERSION                CONTAINER-RUNTIME<br>k8smaster   Ready    master   7m57s   v1.19.5   192.168.163.29   &lt;none&gt;        CentOS Linux 7 (Core)   3.10.0-1160.71.1.el7.x86_64   docker://19.3.11<br>k8sworker   Ready    &lt;none&gt;   50s     v1.19.5   192.168.163.30   &lt;none&gt;        CentOS Linux 7 (Core)   3.10.0-1160.71.1.el7.x86_64   docker://19.3.11<br></code></pre></td></tr></table></figure>
+
+<h2 id="安装Kuboard图形化工具"><a href="#安装Kuboard图形化工具" class="headerlink" title="安装Kuboard图形化工具"></a>安装Kuboard图形化工具</h2><p><a target="_blank" rel="noopener" href="https://www.kuboard.cn/install/v3/install-in-k8s.html#%E6%96%B9%E6%B3%95%E4%B8%80-%E4%BD%BF%E7%94%A8-hostpath-%E6%8F%90%E4%BE%9B%E6%8C%81%E4%B9%85%E5%8C%96">安装文档</a></p>
+<h2 id="安装Ingress"><a href="#安装Ingress" class="headerlink" title="安装Ingress"></a>安装Ingress</h2><p>使得未来能通过域名访问Service.</p>
+<p>本质上就是nginx</p>
+<p>k8s更推荐这种方式, 而非Service(毕竟service需要ip地址、端口, 虽然也能固定)</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/install-ingress.png" alt="安装Ingress"></p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/install-ingress2.png" alt="安装Ingress"></p>
+<p>安装成功</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/install-ingress-success.png" alt="Ingress安装成功"></p>
+<h1 id="最终部署"><a href="#最终部署" class="headerlink" title="最终部署"></a>最终部署</h1><p>Jenkins新增流水线应用</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/new-assembly-line.png" alt="新建流水线"></p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/pipeline-script.png" alt="pipeline script"></p>
+<p>另外也提供了基于git仓库中的Jenkinsfile的方式.</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/pipeline-jenkinsfile.png" alt="准备Jenkinsfile"></p>
+<p>接下来在Gitlab项目根路径下添加<code>Jekinsfile</code>这个文件就好, 内容如下</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><code class="hljs groovy">pipeline &#123;<br>    <span class="hljs-comment">// 指定任务在Jenkins哪个节点执行</span><br>    agent any<br>    <br>    <br>    <span class="hljs-comment">// 声明全局变量</span><br>    environment &#123;<br>        harborUsername = <span class="hljs-string">&#x27;cicd&#x27;</span><br>        harborPassword = <span class="hljs-string">&#x27;Harbor12345&#x27;</span><br>        harborAddress = <span class="hljs-string">&#x27;192.168.163.28:80&#x27;</span><br>        repository = <span class="hljs-string">&#x27;cicd&#x27;</span><br>    &#125;<br><br>    stages &#123;<br>        stage(<span class="hljs-string">&#x27;拉取git仓库代码&#x27;</span>) &#123;<br>            steps &#123;<br>                checkout([<span class="hljs-attr">$class:</span> <span class="hljs-string">&#x27;GitSCM&#x27;</span>, <span class="hljs-attr">branches:</span> [[<span class="hljs-attr">name:</span> <span class="hljs-string">&#x27;*/dev&#x27;</span>]], <span class="hljs-attr">extensions:</span> [], <span class="hljs-attr">userRemoteConfigs:</span> [[<span class="hljs-attr">credentialsId:</span> <span class="hljs-string">&#x27;7a281c56-17b8-4a0e-95b1-62e0cf7275d6&#x27;</span>, <span class="hljs-attr">url:</span> <span class="hljs-string">&#x27;http://192.168.163.21:8929/backend/cicd.git&#x27;</span>]]])<br>            &#125;<br>        &#125;<br>        <br>        stage(<span class="hljs-string">&#x27;通过maven构建项目&#x27;</span>) &#123;<br>            steps &#123;<br>                sh <span class="hljs-string">&#x27;/var/jenkins_home/maven/bin/mvn clean package -DskipTests&#x27;</span><br>            &#125;<br>        &#125;<br>        <br>        stage(<span class="hljs-string">&#x27;通过sonarqube做代码质量检测&#x27;</span>) &#123;<br>            steps &#123;<br>                sh <span class="hljs-string">&#x27;/var/jenkins_home/sonar-scanner/bin/sonar-scanner -Dsonar.sources=./ -Dsonar.projectname=$&#123;JOB_NAME&#125; -Dsonar.projectKey=$&#123;JOB_NAME&#125; -Dsonar.java.binaries=./target/ -Dsonar.login=8f3eee52a57ec314ee64962e4368b33a6b58cc10&#x27;</span><br>            &#125;<br>        &#125;<br>        <br>        stage(<span class="hljs-string">&#x27;通过docker制作自定义镜像&#x27;</span>) &#123;<br>            steps &#123;<br>                sh <span class="hljs-string">&#x27;&#x27;&#x27;mv ./target/*.jar ./docker/</span><br><span class="hljs-string">docker build -t $&#123;JOB_NAME&#125;:latest ./docker/&#x27;&#x27;&#x27;</span><br>            &#125;<br>        &#125;<br>        <br>        stage(<span class="hljs-string">&#x27;将自定义镜像推送到Harbor&#x27;</span>) &#123;<br>            steps &#123;<br>                sh <span class="hljs-string">&#x27;&#x27;&#x27;docker login -u $&#123;harborUsername&#125; -p $&#123;harborPassword&#125; $&#123;harborAddress&#125;</span><br><span class="hljs-string">docker tag $&#123;JOB_NAME&#125;:latest $&#123;harborAddress&#125;/$&#123;repository&#125;/$&#123;JOB_NAME&#125;:latest</span><br><span class="hljs-string">docker push $&#123;harborAddress&#125;/$&#123;repository&#125;/$&#123;JOB_NAME&#125;:latest&#x27;&#x27;&#x27;</span><br>            &#125;<br>        &#125;<br>        <br>        stage(<span class="hljs-string">&#x27;将pipeline.yml传输到k8smaster上&#x27;</span>) &#123;<br>            steps &#123;<br>                sshPublisher(<span class="hljs-attr">publishers:</span> [sshPublisherDesc(<span class="hljs-attr">configName:</span> <span class="hljs-string">&#x27;k8s&#x27;</span>, <span class="hljs-attr">transfers:</span> [sshTransfer(<span class="hljs-attr">cleanRemote:</span> <span class="hljs-literal">false</span>, <span class="hljs-attr">excludes:</span> <span class="hljs-string">&#x27;&#x27;</span>, <span class="hljs-attr">execCommand:</span> <span class="hljs-string">&#x27;&#x27;</span>, <span class="hljs-attr">execTimeout:</span> <span class="hljs-number">120000</span>, <span class="hljs-attr">flatten:</span> <span class="hljs-literal">false</span>, <span class="hljs-attr">makeEmptyDirs:</span> <span class="hljs-literal">false</span>, <span class="hljs-attr">noDefaultExcludes:</span> <span class="hljs-literal">false</span>, <span class="hljs-attr">patternSeparator:</span> <span class="hljs-string">&#x27;[, ]+&#x27;</span>, <span class="hljs-attr">remoteDirectory:</span> <span class="hljs-string">&#x27;&#x27;</span>, <span class="hljs-attr">remoteDirectorySDF:</span> <span class="hljs-literal">false</span>, <span class="hljs-attr">removePrefix:</span> <span class="hljs-string">&#x27;&#x27;</span>, <span class="hljs-attr">sourceFiles:</span> <span class="hljs-string">&#x27;pipeline.yml&#x27;</span>)], <span class="hljs-attr">usePromotionTimestamp:</span> <span class="hljs-literal">false</span>, <span class="hljs-attr">useWorkspaceInPromotion:</span> <span class="hljs-literal">false</span>, <span class="hljs-attr">verbose:</span> <span class="hljs-literal">false</span>)])<br>            &#125;<br>        &#125;<br><br>        stage(<span class="hljs-string">&#x27;jenkins容器ssh调用k8smaster执行apply pipeline.yml&#x27;</span>) &#123;<br>            steps &#123;<br>                sh <span class="hljs-string">&#x27;&#x27;&#x27;ssh root@192.168.163.29 kubectl apply -f /usr/local/jenkins-push-k8s/pipeline.yml</span><br><span class="hljs-string">ssh root@192.168.163.29 kubectl rollout restart deployment pipeline -n test&#x27;&#x27;&#x27;</span><br>            &#125;<br>        &#125;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>注意想让<code>execCommand</code>中$引用的变量能生效, 需用双引号</p>
+<blockquote>
+<p>下面是groovy代码翻译之前的步骤说明</p>
+</blockquote>
+<ol>
+<li><p>拉取git仓库代码</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/pipeline-generate-groovy-code.png" alt="流水线语法生成拉取gitlab仓库代码"></p>
+</li>
+<li><p>通过maven构建项目</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">去调用mvn, clean、package、跳过测试</span><br>/var/jenkins_home/maven/bin/mvn clean package -DskipTests<br></code></pre></td></tr></table></figure>
+</li>
+<li><p>通过sonarqube做代码质量检测</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">指定 源代码路径、projectname、projectKey、打包后路径、登陆的token</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">手动调用质量检测api, 推送给sonarqube服务器</span><br>/var/jenkins_home/sonar-scanner/bin/sonar-scanner -Dsonar.sources=./ -Dsonar.projectname=$&#123;JOB_NAME&#125; -Dsonar.projectKey=$&#123;JOB_NAME&#125; -Dsonar.java.binaries=./target/ -Dsonar.login=8f3eee52a57ec314ee64962e4368b33a6b58cc10<br></code></pre></td></tr></table></figure>
+</li>
+<li><p>通过docker制作自定义镜像</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">移动jar到Dockerfile路径</span><br>mv ./target/*.jar ./docker/<br><span class="hljs-meta prompt_"># </span><span class="language-bash">打包成镜像</span><br>docker build -t $&#123;JOB_NAME&#125;:latest ./docker/<br></code></pre></td></tr></table></figure>
+</li>
+<li><p>将自定义镜像推送到Harbor</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">登录</span><br>docker login -u $&#123;harborUsername&#125; -p $&#123;harborPassword&#125; $&#123;harborAddress&#125;<br><span class="hljs-meta prompt_"># </span><span class="language-bash">改镜像名为符合要求的名字</span><br>docker tag $&#123;JOB_NAME&#125;:latest $&#123;harborAddress&#125;/$&#123;repository&#125;/$&#123;JOB_NAME&#125;:latest<br><span class="hljs-meta prompt_"># </span><span class="language-bash">推送</span><br>docker push $&#123;harborAddress&#125;/$&#123;repository&#125;/$&#123;JOB_NAME&#125;:latest<br></code></pre></td></tr></table></figure>
+</li>
+<li><p>将pipeline.yml传输到k8smaster上(需要安装Pulish Over On SSH插件)</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/push-pipelineyml.png" alt="流水线语法生成推送pipeline.yml文件代码"></p>
+</li>
+<li><p>jenkins容器ssh调用k8smaster执行相关命令</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/ssh-k8smaster-deploy.png" alt="流水线语法生成调用k8smsater执行命令"></p>
+</li>
+</ol>
+<p>gitlab项目根路径下新增<code>pipeline.yml</code>文件</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">apps/v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Deployment</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">namespace:</span> <span class="hljs-string">test</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">pipeline</span><br>  <span class="hljs-attr">labels:</span><br>    <span class="hljs-attr">app:</span> <span class="hljs-string">pipeline</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">replicas:</span> <span class="hljs-number">2</span><br>  <span class="hljs-attr">selector:</span><br>    <span class="hljs-attr">matchLabels:</span><br>      <span class="hljs-attr">app:</span> <span class="hljs-string">pipeline</span><br>  <span class="hljs-attr">template:</span><br>    <span class="hljs-attr">metadata:</span><br>      <span class="hljs-attr">labels:</span><br>        <span class="hljs-attr">app:</span> <span class="hljs-string">pipeline</span><br>    <span class="hljs-attr">spec:</span><br>      <span class="hljs-attr">containers:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">pipeline</span><br>        <span class="hljs-attr">image:</span> <span class="hljs-number">192.168</span><span class="hljs-number">.163</span><span class="hljs-number">.28</span><span class="hljs-string">:80/cicd/pipeline:latest</span><br>        <span class="hljs-attr">imagePullPolicy:</span> <span class="hljs-string">Always</span><br>        <span class="hljs-attr">ports:</span><br>        <span class="hljs-bullet">-</span> <span class="hljs-attr">containerPort:</span> <span class="hljs-number">8080</span><br>      <span class="hljs-comment"># 必须配, 不然harbor仓库无法登陆, 就会出现拉取镜像失败</span><br>      <span class="hljs-attr">imagePullSecrets:</span><br>      <span class="hljs-comment"># 这个name同下面新增的Secret的name</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">harbor</span><br><span class="hljs-meta">---</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Service</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">namespace:</span> <span class="hljs-string">test</span><br>  <span class="hljs-comment"># 这个name需要和deployment的name相同</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">pipeline</span><br>  <span class="hljs-attr">labels:</span><br>    <span class="hljs-attr">app:</span> <span class="hljs-string">pipeline</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">selector:</span><br>    <span class="hljs-comment"># 和spec.selector.matchLabels.app spec.template.metadata.labels.app 两个相同</span><br>    <span class="hljs-attr">app:</span> <span class="hljs-string">nginx</span><br>  <span class="hljs-attr">ports:</span><br>    <span class="hljs-comment"># 指定service的端口</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">port:</span> <span class="hljs-number">8080</span><br>    <span class="hljs-comment"># 容器暴露的端口   </span><br>    <span class="hljs-attr">targetPort:</span> <span class="hljs-number">8080</span><br>  <span class="hljs-attr">type:</span> <span class="hljs-string">NodePort</span><br><span class="hljs-meta">---</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">networking.k8s.io/v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Ingress</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">namespace:</span> <span class="hljs-string">test</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">pipeline</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">ingressClassName:</span> <span class="hljs-string">ingress</span><br>  <span class="hljs-attr">rules:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">host:</span> <span class="hljs-string">lsycai.nginx.top</span><br>    <span class="hljs-attr">http:</span><br>      <span class="hljs-attr">paths:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-attr">path:</span> <span class="hljs-string">/</span><br>        <span class="hljs-attr">pathType:</span> <span class="hljs-string">Prefix</span><br>        <span class="hljs-attr">backend:</span><br>          <span class="hljs-attr">service:</span><br>            <span class="hljs-attr">name:</span> <span class="hljs-string">nginx-deployment</span><br>            <span class="hljs-attr">port:</span><br>              <span class="hljs-comment"># 同service在集群内部暴露的端口</span><br>              <span class="hljs-attr">number:</span> <span class="hljs-number">8080</span><br></code></pre></td></tr></table></figure>
+
+<p>先去kuboard中配置私服登陆信息, 是的k8smaster、k8sworker能登陆! 这样才能使得配置的私服镜像能被拉取下来</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/create-secret.png" alt="创建密钥"></p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/config-harbor-login-secret.png" alt="配置harbor登录信息"></p>
+<p>另外我们想让Jenkins容器通知目标服务器执行命令(即k8smaster执行<code>kubectl apply -f pipeline.yml</code>), 但是使用ssh远程执行如下命令需要输入账号密码</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">ssh root@192.168.163.29 kubectl apply -f /usr/local/jenkins-push-k8s/pipeline.yml<br></code></pre></td></tr></table></figure>
+
+<p>我们采用给Jenkins容器配置免密登录, 让其能直接操作k8smaster.</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">操作Jenkins容器宿主机</span><br>[root@localhost local]# docker exec -it jenkins bash<br>jenkins@780bd8e7b017:~$ cd .ssh<br>bash: cd: .ssh: No such file or directory<br><span class="hljs-meta prompt_"># </span><span class="language-bash">如果没有该文件夹进行生成</span><br>jenkins@780bd8e7b017:/etc/ssh$ ssh-keygen -t rsa -C &quot;ks1229344939@163.com&quot;<br><span class="hljs-meta prompt_"># </span><span class="language-bash">3次回车, 生成公私钥</span><br>jenkins@780bd8e7b017:~$ cd .ssh/<br>jenkins@780bd8e7b017:~/.ssh$ ls<br>id_rsa    id_rsa.pub<br>jenkins@780bd8e7b017:~/.ssh$ cat id_rsa.pub<br><span class="hljs-meta prompt_"># </span><span class="language-bash">手动将公钥内容传递给k8smaster</span><br></code></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">操作k8smaster</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">没有.ssh目录就生成</span><br>[root@k8smaster ~]# ssh-keygen -t rsa -C &quot;ks1229344939@163.com&quot;<br><span class="hljs-meta prompt_"># </span><span class="language-bash">3次回车</span><br>[root@k8smaster ~]# cd .ssh/<br>[root@k8smaster .ssh]# ls<br>id_rsa  id_rsa.pub<br>[root@k8smaster .ssh]# touch authorized_keys<br>[root@k8smaster .ssh]# vim authorized_keys<br><span class="hljs-meta prompt_"># </span><span class="language-bash">将jenkins容器内的ssh公钥放进去</span><br></code></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">在k8smaster那边的authorized_keys文件配置好后, 进行测试</span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">操作Jnekins容器</span><br>jenkins@780bd8e7b017:~/.ssh$ ssh root@192.168.163.29 asda<br></code></pre></td></tr></table></figure>
+
+
+
+<blockquote>
+<p>自动化CI</p>
+</blockquote>
+<ol>
+<li>推送代码后, 如何让Jenkins自动执行任务</li>
+</ol>
+<ul>
+<li>webhooks</li>
+</ul>
+<p>Jenkins安装Gitlab插件</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/install-gitlab-plugin.png" alt="安装Gialab插件"></p>
+<p>暂时做如下图的配置</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/gitlab-plugin-config.png" alt="Jenkins webhook配置"></p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/gitlab-webhooks-config.png" alt="gitlab webhooks配置"></p>
+<p>点击添加会报错</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/gitlab-webhooks-config-problem.png" alt="Gitlab webhook配置报错"></p>
+<p>解决方案</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/gitlab-admin-config.png" alt="管理员配置"></p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/gitlab-network-config.png" alt="gitlab网络配置"></p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/config-outbound-request.png" alt="配置出站请求"></p>
+<p>重新添加Webhooks即可。</p>
+<p>测试出发推送事件, 又会报错</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/push-events-problem.png" alt="push events触发报错"></p>
+<p>Jenkins, 全局配置中找到Gitlab</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/remove-security-certification.png" alt="去掉Jenkins对于Gitlab的安全认证"></p>
+<p>这下在gitlab代码存在推送事件就能正常触发Jenkins的任务了。</p>
+<p>本地hosts文件(<code>C:\Windows\System32\drivers\etc</code>)配一个dns, 浏览器就能通过域名:端口访问了.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">192.168.163.21 lsycai.nginx.top<br></code></pre></td></tr></table></figure>
+
+<h1 id="踩坑"><a href="#踩坑" class="headerlink" title="踩坑"></a>踩坑</h1><p>碰到如下问题, 是因为<code>windows开了代理</code>!!!</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/windows-proxy-problem.png" alt="访问不了"></p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/access-success.png" alt="windows去除代理后就正常了"></p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>还蛮耗资源的</p>
+<p><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/ci-gitlab-jenkins/summary.png" alt="全流程"></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">yincaiTA</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://lsycai.top/ci-gitlab-jenkins/">https://lsycai.top/ci-gitlab-jenkins/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://lsycai.top" target="_blank">yincaiTA' Blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Gitlab/">Gitlab</a><a class="post-meta__tags" href="/tags/CI/">CI</a><a class="post-meta__tags" href="/tags/k8s/">k8s</a><a class="post-meta__tags" href="/tags/Jenkins/">Jenkins</a></div><div class="post_share"><div class="social-share" data-image="https://img.lsycai.top/cover/ci-gitlab-jenkins.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/template-virtual-machine/"><img class="prev-cover" src="/self/images/loading.gif" data-original="https://img.lsycai.top/cover/template-virtual-machine.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">VMware配置静态IP模板机</div></div></a></div><div class="next-post pull-right"><a href="/ci-gitlab-jenkins-personal-notes/"><img class="next-cover" src="/self/images/loading.gif" data-original="https://img.lsycai.top/cover/ci-gitlab-jenkins.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">持续集成 Gitlab、Jenkins方案(个人随录)</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/ci-gitlab-jenkins-personal-notes/" title="持续集成 Gitlab、Jenkins方案(个人随录)"><img class="cover" src="/self/images/loading.gif" data-original="https://img.lsycai.top/cover/ci-gitlab-jenkins.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-02-01</div><div class="title">持续集成 Gitlab、Jenkins方案(个人随录)</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/self/images/loading.gif" data-original="/self/images/author_avatar.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">yincaiTA</div><div class="author-info__description">小善的学习笔记 🐟</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">7</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">13</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">5</div></a></div></div><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/yincaita" target="_blank" title="Github"><i class="fab fa-github"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9C%BA%E5%99%A8%E5%87%86%E5%A4%87"><span class="toc-number">1.</span> <span class="toc-text">机器准备</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Gialab%E5%AE%89%E8%A3%85"><span class="toc-number">2.</span> <span class="toc-text">Gialab安装</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Jenkins%E5%AE%89%E8%A3%85"><span class="toc-number">3.</span> <span class="toc-text">Jenkins安装</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%BF%E4%B8%BB%E6%9C%BA%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87"><span class="toc-number">3.1.</span> <span class="toc-text">宿主机环境准备</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Jenkins%E5%AE%89%E8%A3%85-1"><span class="toc-number">3.2.</span> <span class="toc-text">Jenkins安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%85%8D%E7%BD%AEJDK%E5%92%8CMaven"><span class="toc-number">3.3.</span> <span class="toc-text">配置JDK和Maven</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%85%8D%E7%BD%AESSH-Server"><span class="toc-number">3.4.</span> <span class="toc-text">配置SSH Server</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%87%86%E5%A4%87Gitlab%E4%BB%A3%E7%A0%81"><span class="toc-number">3.5.</span> <span class="toc-text">准备Gitlab代码</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#SpringBoot%E5%BA%94%E7%94%A8"><span class="toc-number">3.5.1.</span> <span class="toc-text">SpringBoot应用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%87%86%E5%A4%87Dockerfile"><span class="toc-number">3.5.2.</span> <span class="toc-text">准备Dockerfile</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Jenkins%E9%9B%86%E6%88%90Sonar-Qube"><span class="toc-number">4.</span> <span class="toc-text">Jenkins集成Sonar Qube</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85Sonar-Qube"><span class="toc-number">4.1.</span> <span class="toc-text">安装Sonar Qube</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8C%82%E8%BD%BDsonar-scanner%E5%88%B0Jenkins%E6%95%B0%E6%8D%AE%E5%8D%B7"><span class="toc-number">4.2.</span> <span class="toc-text">挂载sonar-scanner到Jenkins数据卷</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B4%E5%90%88sonarqube%E5%88%B0jenkins"><span class="toc-number">4.3.</span> <span class="toc-text">整合sonarqube到jenkins</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#harbor%E9%95%9C%E5%83%8F%E4%BB%93%E5%BA%93"><span class="toc-number">5.</span> <span class="toc-text">harbor镜像仓库</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85Harbor"><span class="toc-number">5.1.</span> <span class="toc-text">安装Harbor</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8E%A8%E9%80%81%E9%95%9C%E5%83%8F%E5%88%B0%E4%BB%93%E5%BA%93%E7%9A%84%E9%A2%84%E9%85%8D%E7%BD%AE"><span class="toc-number">5.2.</span> <span class="toc-text">推送镜像到仓库的预配置</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%95%9C%E5%83%8F%E5%90%8D%E8%A7%84%E8%8C%83"><span class="toc-number">5.2.1.</span> <span class="toc-text">镜像名规范</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%93%E5%BA%93%E7%99%BD%E5%90%8D%E5%8D%95%E9%85%8D%E7%BD%AE"><span class="toc-number">5.2.2.</span> <span class="toc-text">仓库白名单配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Jenkins%E5%AE%B9%E5%99%A8%E5%86%85%E9%83%A8%E6%89%A7%E8%A1%8C%E5%AE%BF%E4%B8%BB%E6%9C%BAdocker%E5%91%BD%E4%BB%A4"><span class="toc-number">5.2.3.</span> <span class="toc-text">Jenkins容器内部执行宿主机docker命令</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AE%89%E8%A3%85K8s"><span class="toc-number">6.</span> <span class="toc-text">安装K8s</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85k8s%E9%9B%86%E7%BE%A4"><span class="toc-number">6.1.</span> <span class="toc-text">安装k8s集群</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85Kuboard%E5%9B%BE%E5%BD%A2%E5%8C%96%E5%B7%A5%E5%85%B7"><span class="toc-number">6.2.</span> <span class="toc-text">安装Kuboard图形化工具</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85Ingress"><span class="toc-number">6.3.</span> <span class="toc-text">安装Ingress</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9C%80%E7%BB%88%E9%83%A8%E7%BD%B2"><span class="toc-number">7.</span> <span class="toc-text">最终部署</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%B8%A9%E5%9D%91"><span class="toc-number">8.</span> <span class="toc-text">踩坑</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">9.</span> <span class="toc-text">总结</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/ci-gitlab-jenkins-personal-notes/" title="持续集成 Gitlab、Jenkins方案(个人随录)"><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/cover/ci-gitlab-jenkins.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="持续集成 Gitlab、Jenkins方案(个人随录)"/></a><div class="content"><a class="title" href="/ci-gitlab-jenkins-personal-notes/" title="持续集成 Gitlab、Jenkins方案(个人随录)">持续集成 Gitlab、Jenkins方案(个人随录)</a><time datetime="2023-02-01T07:44:00.000Z" title="发表于 2023-02-01 15:44:00">2023-02-01</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/ci-gitlab-jenkins/" title="持续集成 Gitlab、Jenkins方案"><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/cover/ci-gitlab-jenkins.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="持续集成 Gitlab、Jenkins方案"/></a><div class="content"><a class="title" href="/ci-gitlab-jenkins/" title="持续集成 Gitlab、Jenkins方案">持续集成 Gitlab、Jenkins方案</a><time datetime="2023-02-01T07:44:00.000Z" title="发表于 2023-02-01 15:44:00">2023-02-01</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/template-virtual-machine/" title="VMware配置静态IP模板机"><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/cover/template-virtual-machine.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="VMware配置静态IP模板机"/></a><div class="content"><a class="title" href="/template-virtual-machine/" title="VMware配置静态IP模板机">VMware配置静态IP模板机</a><time datetime="2022-08-06T04:52:14.000Z" title="发表于 2022-08-06 12:52:14">2022-08-06</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/spring-source-core-compile/" title="Spring源码编译"><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/cover/spring-source-compile.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Spring源码编译"/></a><div class="content"><a class="title" href="/spring-source-core-compile/" title="Spring源码编译">Spring源码编译</a><time datetime="2022-01-10T08:33:46.000Z" title="发表于 2022-01-10 16:33:46">2022-01-10</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/butterfly-theme-config/" title="butterfly主题配置"><img src="/self/images/loading.gif" data-original="https://img.lsycai.top/cover/hexo-butterfly-config.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="butterfly主题配置"/></a><div class="content"><a class="title" href="/butterfly-theme-config/" title="butterfly主题配置">butterfly主题配置</a><time datetime="2021-12-25T16:03:33.000Z" title="发表于 2021-12-26 00:03:33">2021-12-26</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('https://img.lsycai.top/cover/ci-gitlab-jenkins.png')"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2023 By yincaiTA</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="font-plus" type="button" title="放大字体"><i class="fas fa-plus"></i></button><button id="font-minus" type="button" title="缩小字体"><i class="fas fa-minus"></i></button><button id="translateLink" type="button" title="简繁转换">简</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script>
+            window.imageLazyLoadSetting = {
+                isSPA: false,
+                preloadRatio: 1,
+                processImages: null,
+            };
+        </script><script>window.addEventListener("load",function(){var t=/\.(gif|jpg|jpeg|tiff|png)$/i,r=/^data:image\/[a-z]+;base64,/;Array.prototype.slice.call(document.querySelectorAll("img[data-original]")).forEach(function(a){var e=a.parentNode;"A"===e.tagName&&(e.href.match(t)||e.href.match(r))&&(e.href=a.dataset.original)})});</script><script>!function(n){n.imageLazyLoadSetting.processImages=o;var e=n.imageLazyLoadSetting.isSPA,i=n.imageLazyLoadSetting.preloadRatio||1,r=Array.prototype.slice.call(document.querySelectorAll("img[data-original]"));function o(){e&&(r=Array.prototype.slice.call(document.querySelectorAll("img[data-original]")));for(var t,a=0;a<r.length;a++)0<=(t=(t=r[a]).getBoundingClientRect()).bottom&&0<=t.left&&t.top<=(n.innerHeight*i||document.documentElement.clientHeight*i)&&function(){var t,e,n,i,o=r[a];t=o,e=function(){r=r.filter(function(t){return o!==t})},n=new Image,i=t.getAttribute("data-original"),n.onload=function(){t.src=i,e&&e()},t.src!==i&&(n.src=i)}()}o(),n.addEventListener("scroll",function(){var t,e;t=o,e=n,clearTimeout(t.tId),t.tId=setTimeout(function(){t.call(e)},500)})}(this);</script></body></html>
